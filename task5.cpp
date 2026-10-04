@@ -4,6 +4,7 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include "console_utf8.h"
 
 struct Aircraft {
     std::string name;
@@ -15,21 +16,23 @@ struct Aircraft {
 };
 
 int main() {
+    setupRussianConsole();
     constexpr double g = 9.81;
     double density, velocity, height;
-    std::cout << "Air density rho (kg/m^3), velocity V (m/s), target height h (m): ";
+    std::cout << "Введите плотность воздуха rho (кг/м^3), скорость V (м/с) и высоту h (м): ";
     std::cin >> density >> velocity >> height;
 
     std::vector<Aircraft> aircraft(3);
     for (int i = 0; i < 3; ++i) {
-        aircraft[i].name = "Aircraft " + std::to_string(i + 1);
-        std::cout << aircraft[i].name << " - mass, wing area, thrust, CL, CD: ";
+        aircraft[i].name = "Самолет " + std::to_string(i + 1);
+        std::cout << aircraft[i].name
+                  << " - введите массу, площадь крыла, тягу, CL и CD: ";
         std::cin >> aircraft[i].mass >> aircraft[i].wingArea >> aircraft[i].thrust
                  >> aircraft[i].liftCoefficient >> aircraft[i].dragCoefficient;
     }
 
     if (!std::cin || density <= 0 || velocity < 0 || height <= 0) {
-        std::cerr << "Error: invalid input.\n";
+        std::cerr << "Ошибка: введены некорректные данные.\n";
         return 1;
     }
 
@@ -40,7 +43,7 @@ int main() {
     for (const auto& plane : aircraft) {
         if (plane.mass <= 0 || plane.wingArea <= 0 || plane.thrust < 0 ||
             plane.liftCoefficient < 0 || plane.dragCoefficient < 0) {
-            std::cerr << "Error: invalid aircraft parameters.\n";
+            std::cerr << "Ошибка: параметры самолета должны быть корректными.\n";
             return 1;
         }
 
@@ -50,23 +53,25 @@ int main() {
         const double ax = (plane.thrust - drag) / plane.mass;
         const double ay = (lift - plane.mass * g) / plane.mass;
 
-        std::cout << plane.name << ": L=" << lift << " N, D=" << drag
-                  << " N, ax=" << ax << " m/s^2, ay=" << ay << " m/s^2";
+        std::cout << plane.name << ": подъемная сила L = " << lift
+                  << " Н, сопротивление D = " << drag << " Н, ax = " << ax
+                  << " м/с^2, ay = " << ay << " м/с^2";
         if (ay > 0) {
             const double time = std::sqrt(2.0 * height / ay);
-            std::cout << ", climb time=" << time << " s";
+            std::cout << ", время набора высоты = " << time << " с";
             if (time < bestTime) {
                 bestTime = time;
                 bestName = plane.name;
             }
         } else {
-            std::cout << ", target height cannot be reached in this model";
+            std::cout << ", самолет не может набирать высоту при этих параметрах";
         }
         std::cout << '\n';
     }
 
     if (bestName != "none")
-        std::cout << "Fastest climb: " << bestName << " (" << bestTime << " s)\n";
+        std::cout << "Быстрее всех наберет высоту: " << bestName
+                  << " (" << bestTime << " с)\n";
     else
-        std::cout << "None of the aircraft can climb with the supplied parameters.\n";
+        std::cout << "Ни один самолет не может набрать высоту при заданных параметрах.\n";
 }
