@@ -3,6 +3,7 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include "console_utf8.h"
 
 struct Aircraft {
     double mass;
@@ -13,15 +14,16 @@ struct Aircraft {
 };
 
 int main() {
+    setupRussianConsole();
     int count;
     double density, velocity;
-    std::cout << "Number of aircraft N: ";
+    std::cout << "Введите количество самолетов N: ";
     std::cin >> count;
-    std::cout << "Air density rho (kg/m^3) and velocity V (m/s): ";
+    std::cout << "Введите плотность воздуха rho (кг/м^3) и скорость V (м/с): ";
     std::cin >> density >> velocity;
 
     if (!std::cin || count <= 0 || density <= 0 || velocity < 0) {
-        std::cerr << "Error: invalid input.\n";
+        std::cerr << "Ошибка: введены некорректные данные.\n";
         return 1;
     }
 
@@ -31,14 +33,15 @@ int main() {
 
     std::cout << std::fixed << std::setprecision(2);
     for (int i = 0; i < count; ++i) {
-        std::cout << "Aircraft " << i + 1 << " - mass, wing area, thrust, CL, CD: ";
+        std::cout << "Самолет " << i + 1
+                  << " - введите массу, площадь крыла, тягу, CL и CD: ";
         std::cin >> aircraft[i].mass >> aircraft[i].wingArea >> aircraft[i].thrust
                  >> aircraft[i].liftCoefficient >> aircraft[i].dragCoefficient;
 
         const auto& plane = aircraft[i];
         if (!std::cin || plane.mass <= 0 || plane.wingArea <= 0 || plane.thrust < 0 ||
             plane.liftCoefficient < 0 || plane.dragCoefficient < 0) {
-            std::cerr << "Error: invalid aircraft parameters.\n";
+            std::cerr << "Ошибка: некорректные параметры самолета.\n";
             return 1;
         }
 
@@ -47,14 +50,14 @@ int main() {
         const double drag = dynamicPressure * plane.wingArea * plane.dragCoefficient;
         const double acceleration = (plane.thrust - drag) / plane.mass;
 
-        std::cout << "  L=" << lift << " N, D=" << drag
-                  << " N, acceleration=" << acceleration << " m/s^2\n";
+        std::cout << "  Подъемная сила L = " << lift << " Н, сопротивление D = "
+                  << drag << " Н, ускорение = " << acceleration << " м/с^2\n";
         if (acceleration > bestAcceleration) {
             bestAcceleration = acceleration;
             leader = i;
         }
     }
 
-    std::cout << "Greatest acceleration: Aircraft " << leader + 1
-              << " (" << bestAcceleration << " m/s^2)\n";
+    std::cout << "Наибольшее ускорение имеет самолет " << leader + 1
+              << " (" << bestAcceleration << " м/с^2)\n";
 }
