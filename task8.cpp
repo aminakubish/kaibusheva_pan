@@ -5,6 +5,7 @@
 #include <limits>
 #include <string>
 #include <vector>
+#include "console_utf8.h"
 
 struct Aircraft {
     std::string name;
@@ -16,28 +17,29 @@ struct Aircraft {
 };
 
 int main() {
+    setupRussianConsole();
     constexpr double g = 9.81;
     int count;
     double density, velocity, wingArea, height;
-    std::cout << "Number of aircraft: ";
+    std::cout << "Введите количество самолетов: ";
     std::cin >> count;
-    std::cout << "Common rho, velocity, wing area, target height: ";
+    std::cout << "Введите общие значения rho, скорости, площади крыла и высоты: ";
     std::cin >> density >> velocity >> wingArea >> height;
 
     if (!std::cin || count <= 0 || density <= 0 || velocity < 0 || wingArea <= 0 || height <= 0) {
-        std::cerr << "Error: invalid input.\n";
+        std::cerr << "Ошибка: введены некорректные данные.\n";
         return 1;
     }
 
     std::vector<Aircraft> aircraft(count);
     for (int i = 0; i < count; ++i) {
-        aircraft[i].name = "Aircraft " + std::to_string(i + 1);
-        std::cout << aircraft[i].name << " - mass, thrust, CL, CD: ";
+        aircraft[i].name = "Самолет " + std::to_string(i + 1);
+        std::cout << aircraft[i].name << " - введите массу, тягу, CL и CD: ";
         std::cin >> aircraft[i].mass >> aircraft[i].thrust
                  >> aircraft[i].liftCoefficient >> aircraft[i].dragCoefficient;
         if (!std::cin || aircraft[i].mass <= 0 || aircraft[i].thrust < 0 ||
             aircraft[i].liftCoefficient < 0 || aircraft[i].dragCoefficient < 0) {
-            std::cerr << "Error: invalid aircraft parameters.\n";
+            std::cerr << "Ошибка: некорректные параметры самолета.\n";
             return 1;
         }
 
@@ -52,12 +54,13 @@ int main() {
         return a.climbTime < b.climbTime;
     });
 
-    std::cout << std::fixed << std::setprecision(3) << "\nSorted by climb time:\n";
+    std::cout << std::fixed << std::setprecision(3)
+              << "\nСамолеты по возрастанию времени набора высоты:\n";
     for (const auto& plane : aircraft) {
         std::cout << plane.name << ": ";
         if (std::isfinite(plane.climbTime))
-            std::cout << plane.climbTime << " s\n";
+            std::cout << plane.climbTime << " с\n";
         else
-            std::cout << "cannot climb with the supplied parameters\n";
+            std::cout << "не может набирать высоту при заданных параметрах\n";
     }
 }
