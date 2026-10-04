@@ -2,17 +2,21 @@
 #include <iomanip>
 #include <iostream>
 #include <limits>
+#include "console_utf8.h"
 
 int main() {
-    double mass, drag, height, minThrust, maxThrust, thrustStep;
-    std::cout << "Mass m (kg), drag D (N), target height h (m): ";
-    std::cin >> mass >> drag >> height;
-    std::cout << "Tmin, Tmax, deltaT (N): ";
+    setupRussianConsole();
+    constexpr double g = 9.81;
+    double mass, lift, height, minThrust, maxThrust, thrustStep;
+    std::cout << "Введите массу m (кг), подъемную силу L (Н) и высоту h (м): ";
+    std::cin >> mass >> lift >> height;
+    std::cout << "Введите минимальную тягу Tmin, максимальную тягу Tmax"
+                 " и шаг изменения тяги deltaT (Н): ";
     std::cin >> minThrust >> maxThrust >> thrustStep;
 
-    if (!std::cin || mass <= 0 || drag < 0 || height <= 0 || minThrust < 0 ||
+    if (!std::cin || mass <= 0 || lift < 0 || height <= 0 || minThrust < 0 ||
         maxThrust < minThrust || thrustStep <= 0) {
-        std::cerr << "Error: invalid input.\n";
+        std::cerr << "Ошибка: введены некорректные данные.\n";
         return 1;
     }
 
@@ -20,9 +24,9 @@ int main() {
     double bestThrust = 0.0;
 
     std::cout << std::fixed << std::setprecision(3)
-              << "\nThrust (N)\tAcceleration (m/s^2)\tTime (s)\n";
+              << "\nТяга (Н)\tУскорение (м/с^2)\tВремя (с)\n";
     for (double thrust = minThrust; thrust <= maxThrust + thrustStep * 1e-9; thrust += thrustStep) {
-        const double verticalAcceleration = (thrust - drag) / mass;
+        const double verticalAcceleration = (lift + thrust - mass * g) / mass;
         std::cout << thrust << "\t\t" << verticalAcceleration << "\t\t";
 
         if (verticalAcceleration > 0) {
@@ -33,14 +37,14 @@ int main() {
                 bestThrust = thrust;
             }
         } else {
-            std::cout << "not reachable";
+            std::cout << "набор высоты невозможен";
         }
         std::cout << '\n';
     }
 
     if (std::isfinite(bestTime))
-        std::cout << "\nOptimal thrust = " << bestThrust
-                  << " N, minimum climb time = " << bestTime << " s\n";
+        std::cout << "\nОптимальная тяга = " << bestThrust
+                  << " Н, минимальное время набора высоты = " << bestTime << " с\n";
     else
-        std::cout << "\nNo tested thrust produces positive climb acceleration.\n";
+        std::cout << "\nНи одно значение тяги не дает положительного ускорения набора высоты.\n";
 }
